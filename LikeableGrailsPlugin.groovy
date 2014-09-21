@@ -14,7 +14,6 @@
  */
 
 import grails.util.GrailsNameUtils
-import ru.jconsulting.likeable.DomainTypeRegistry
 import ru.jconsulting.likeable.Like
 import ru.jconsulting.likeable.LikeException
 import ru.jconsulting.likeable.Likeable
@@ -51,6 +50,7 @@ class LikeableGrailsPlugin {
             config.grails.likeable.liker.evaluator = { request.user }
         }
 
+        // find all Likeable domains and add their classes to registry
         def domains = application.domainClasses.findAll {Likeable.class.isAssignableFrom(it.clazz)}.collect {it.clazz}
         likeableDomainRegistry(DomainTypeRegistry) {
             domainClassList = domains

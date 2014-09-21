@@ -18,6 +18,13 @@ class LikeableController {
 
     def likeableDomainRegistry
 
+    /**
+     * Adds a <tt>Like</tt> to the instance (or removes it if present)
+     *
+     * @param type short type name of domain
+     * @param id instance id
+     * @return total likes of the instance or 404 if it doesn't exist
+     */
     def like() {
         def liker = evaluateLiker()
 
@@ -34,6 +41,12 @@ class LikeableController {
         render "${d.getTotalLikes()}"
     }
 
+    /**
+     * Evaluates user in accordance to <tt>grails.likeable.liker.evaluator</tt> config of application
+     *
+     * @return evaluated user
+     * @throws LikeException if user is evaluated to <tt>null</tt> or it is not a persisted entity
+     */
     def evaluateLiker() {
         def evaluator = grailsApplication.config.grails.likeable.liker.evaluator
         def liker = null;

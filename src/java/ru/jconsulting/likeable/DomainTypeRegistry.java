@@ -21,6 +21,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Registry of domain types. Used to store all types of Likeable domains.
+ * Type is evaluated by {@link grails.util.GrailsNameUtils#getPropertyName(Class)}
+ *
+ * @see grails.util.GrailsNameUtils
+ */
 public class DomainTypeRegistry implements InitializingBean {
 
     private List<Class> domainClassList;
@@ -39,6 +45,13 @@ public class DomainTypeRegistry implements InitializingBean {
         this.domainClassList = domainClassList;
     }
 
+    /**
+     * Returns Class of domain by it's short type name
+     *
+     * @param type short type name of domain
+     * @return <tt>Class</tt> of domain associated with the <tt>type</tt> param
+     * @throws LikeException if there is no Domain associated with such <tt>type</tt>
+     */
     public Class getClassByType(String type) {
         if (type2ClassMap.containsKey(type)) {
             return type2ClassMap.get(type);
