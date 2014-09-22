@@ -49,7 +49,7 @@ class LikeableController {
      */
     def evaluateLiker() {
         def evaluator = grailsApplication.config.grails.likeable.liker.evaluator
-        def liker = null;
+        def liker
         if (evaluator instanceof Closure) {
             evaluator.delegate = this
             evaluator.resolveStrategy = Closure.DELEGATE_ONLY

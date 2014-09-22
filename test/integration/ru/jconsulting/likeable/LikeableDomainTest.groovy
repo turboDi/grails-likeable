@@ -30,7 +30,7 @@ class LikeableDomainTest extends GroovyTestCase {
 
     void testToString() {
         saveTested()
-        grailsApplication.config.grails.likeable.liker.className = TestLiker.class.getName()
+        grailsApplication.config.grails.likeable.liker.className = TestLiker.name
         assertEquals "$l1 liked testDomain : $d.id", d.userLike(l1).toString()
     }
 

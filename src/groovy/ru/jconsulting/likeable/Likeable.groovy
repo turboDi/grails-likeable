@@ -17,5 +17,5 @@ package ru.jconsulting.likeable
 /**
  * Marker interface used to specify a domain that can be liked
  */
-public interface Likeable {
+interface Likeable {
 }

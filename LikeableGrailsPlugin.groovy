@@ -14,44 +14,37 @@
  */
 
 import grails.util.GrailsNameUtils
+import ru.jconsulting.likeable.DomainTypeRegistry
 import ru.jconsulting.likeable.Like
 import ru.jconsulting.likeable.LikeException
 import ru.jconsulting.likeable.Likeable
-import ru.jconsulting.likeable.DomainTypeRegistry
 
 class LikeableGrailsPlugin {
-    // the plugin version
     def version = "0.1.0"
-    // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0 > *"
-    // resources that are excluded from plugin packaging
     def pluginExcludes = [
-            "grails-app/views/error.gsp",
-            "grails-app/domain/ru/jconsulting/likeable/TestDomain.groovy",
-            "grails-app/domain/ru/jconsulting/likeable/TestLiker.groovy"
+        "grails-app/domain/ru/jconsulting/likeable/TestDomain.groovy",
+        "grails-app/domain/ru/jconsulting/likeable/TestLiker.groovy"
     ]
 
     def title = "Likeable Plugin"
     def author = "Dmitry Borisov"
     def authorEmail = "turbo_di@outlook.com"
-    def description = "A plugin, that adds like functionality to domain classes. A light version of Rateable plugin"
-
-    // URL to the plugin's documentation
+    def description = "Adds like functionality to domain classes. A light version of Rateable plugin"
     def documentation = "http://grails.org/plugin/likeable"
-
     def license = "APACHE"
     def issueManagement = [ system: "GitHub", url: "https://github.com/turboDi/grails-likeable/issues" ]
     def scm = [ url: "https://github.com/turboDi/grails-likeable" ]
 
     def doWithSpring = {
-        def config = application.config
+        def config = application.config.grails.likeable
 
-        if (!config.grails.likeable.liker.evaluator) {
-            config.grails.likeable.liker.evaluator = { request.user }
+        if (!config.liker.evaluator) {
+            config.liker.evaluator = { request.user }
         }
 
         // find all Likeable domains and add their classes to registry
-        def domains = application.domainClasses.findAll {Likeable.class.isAssignableFrom(it.clazz)}.collect {it.clazz}
+        def domains = application.domainClasses.findAll {Likeable.isAssignableFrom(it.clazz)}.collect {it.clazz}
         likeableDomainRegistry(DomainTypeRegistry) {
             domainClassList = domains
         }
@@ -59,69 +52,70 @@ class LikeableGrailsPlugin {
 
     def doWithDynamicMethods = { ctx ->
         for (domainClass in application.domainClasses) {
-            if (Likeable.class.isAssignableFrom(domainClass.clazz)) {
-                domainClass.clazz.metaClass {
+            if (!Likeable.isAssignableFrom(domainClass.clazz)) {
+                continue
+            }
 
-                    getTotalLikes = { ->
-                        def instance = delegate
-                        if (instance.id != null) {
-                            Like.createCriteria().get {
-                                projections {
-                                    rowCount()
-                                }
-                                eq "likeRef", instance.id
-                                eq "type", GrailsNameUtils.getPropertyName(instance.class)
-                                cache true
-                            }
-                        } else {
-                            return 0
-                        }
+            domainClass.clazz.metaClass {
+
+                getTotalLikes = { ->
+                    def instance = delegate
+                    if (instance.id == null) {
+                        return 0
                     }
 
-                    like = { liker ->
-                        def instance = delegate
-                        if (!instance.id) {
-                            throw new LikeException("You must save the entity [${delegate}] before calling like")
+                    Like.createCriteria().get {
+                        projections {
+                            rowCount()
                         }
-                        // try to find an existing like
-                        def l = Like.createCriteria().get {
-                            eq 'likerId', liker.id
-                            eq "likeRef", instance.id
-                            eq "type", GrailsNameUtils.getPropertyName(instance.class)
-                            cache true
-                        }
-                        // if there is no existing value, create a new one
-                        if (!l) {
-                            l = new Like(likerId: liker.id, likeRef: instance.id, type: GrailsNameUtils.getPropertyName(instance.class))
-                            if (!l.validate()) {
-                                throw new LikeException("You must save the entity [${liker}] before calling like")
-                            }
-                            l.save()
-                        }
-                        // for an existing like, delete it
-                        else {
-                            l.delete()
-                        }
-                        return instance
+                        eq "likeRef", instance.id
+                        eq "type", GrailsNameUtils.getPropertyName(instance.class)
+                        cache true
                     }
+                }
 
-                    userLike = { user ->
-                        if (!user) return
-                        def instance = delegate
-                        Like.createCriteria().get {
-                            eq 'likerId', user.id
-                            eq "likeRef", instance.id
-                            eq "type", GrailsNameUtils.getPropertyName(instance.class)
-                            cache true
+                like = { liker ->
+                    def instance = delegate
+                    if (!instance.id) {
+                        throw new LikeException("You must save the entity [${delegate}] before calling like")
+                    }
+                    // try to find an existing like
+                    def l = Like.createCriteria().get {
+                        eq 'likerId', liker.id
+                        eq "likeRef", instance.id
+                        eq "type", GrailsNameUtils.getPropertyName(instance.class)
+                        cache true
+                    }
+                    // if there is no existing value, create a new one
+                    if (!l) {
+                        l = new Like(likerId: liker.id, likeRef: instance.id, type: GrailsNameUtils.getPropertyName(instance.class))
+                        if (!l.validate()) {
+                            throw new LikeException("You must save the entity [${liker}] before calling like")
                         }
+                        l.save()
                     }
+                    // for an existing like, delete it
+                    else {
+                        l.delete()
+                    }
+                    return instance
+                }
 
-                    userLiked = { user ->
-                        delegate.userLike(user) != null
+                userLike = { user ->
+                    if (!user) return
+                    def instance = delegate
+                    Like.createCriteria().get {
+                        eq 'likerId', user.id
+                        eq "likeRef", instance.id
+                        eq "type", GrailsNameUtils.getPropertyName(instance.class)
+                        cache true
                     }
+                }
+
+                userLiked = { user ->
+                    delegate.userLike(user) != null
                 }
             }
         }
     }
-
 }
