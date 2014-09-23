@@ -29,34 +29,32 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DomainTypeRegistry implements InitializingBean {
 
-    private List<Class> domainClassList;
+    private List<Class<?>> domainClassList;
 
-    private Map<String, Class> type2ClassMap;
+    private Map<String, Class<?>> type2ClassMap;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        type2ClassMap = new ConcurrentHashMap<String, Class>(domainClassList.size());
-        for (Class clazz : domainClassList) {
+    public void afterPropertiesSet() {
+        type2ClassMap = new ConcurrentHashMap<String, Class<?>>(domainClassList.size());
+        for (Class<?> clazz : domainClassList) {
             type2ClassMap.put(GrailsNameUtils.getPropertyName(clazz), clazz);
         }
     }
 
-    public void setDomainClassList(List<Class> domainClassList) {
+    public void setDomainClassList(List<Class<?>> domainClassList) {
         this.domainClassList = domainClassList;
     }
 
     /**
-     * Returns Class of domain by it's short type name
+     * Returns Class of domain by its short type name
      *
      * @param type short type name of domain
      * @return <tt>Class</tt> of domain associated with the <tt>type</tt> param
      * @throws LikeException if there is no Domain associated with such <tt>type</tt>
      */
-    public Class getClassByType(String type) {
+    public Class<?> getClassByType(String type) {
         if (type2ClassMap.containsKey(type)) {
             return type2ClassMap.get(type);
-        } else {
-            throw new LikeException(String.format("Type '%s' is not a Likeable type", type));
         }
+        throw new LikeException(String.format("Type '%s' is not a Likeable type", type));
     }
 }
