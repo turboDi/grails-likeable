@@ -1,1 +1,7 @@
-target/
+/target
+/web-app/WEB-INF
+*.log
+.settings
+plugin.xml
+grails-likeable-*.zip
+grails-likeable-*.zip.sha1
