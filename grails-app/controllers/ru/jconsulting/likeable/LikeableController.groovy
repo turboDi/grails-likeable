@@ -48,7 +48,7 @@ class LikeableController {
      * @throws LikeException if user is evaluated to <tt>null</tt> or it is not a persisted entity
      */
     def evaluateLiker() {
-        def evaluator = grailsApplication.config.grails.likeable.liker.evaluator
+        def evaluator = grailsApplication.config.grails.plugin.likeable.liker.evaluator
         def liker
         if (evaluator instanceof Closure) {
             evaluator.delegate = this
@@ -57,7 +57,7 @@ class LikeableController {
         }
 
         if (!liker) {
-            throw new LikeException("No [grails.likeable.liker.evaluator] setting defined or the evaluator doesn't " +
+            throw new LikeException("No [grails.plugin.likeable.liker.evaluator] setting defined or the evaluator doesn't " +
                     "evaluate to an entity. Please define the evaluator correctly in grails-app/conf/Config.groovy " +
                     "or ensure like is secured via your security rules")
         }

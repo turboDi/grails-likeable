@@ -20,7 +20,7 @@ import ru.jconsulting.likeable.LikeException
 import ru.jconsulting.likeable.Likeable
 
 class LikeableGrailsPlugin {
-    def version = "0.1.1"
+    def version = "0.1.2"
     def grailsVersion = "2.0 > *"
     def pluginExcludes = [
         "grails-app/domain/ru/jconsulting/likeable/TestDomain.groovy",
@@ -37,7 +37,7 @@ class LikeableGrailsPlugin {
     def scm = [ url: "https://github.com/turboDi/grails-likeable" ]
 
     def doWithSpring = {
-        def config = application.config.grails.likeable
+        def config = application.config.grails.plugin.likeable
 
         if (!config.liker.evaluator) {
             config.liker.evaluator = { request.user }
@@ -74,7 +74,7 @@ class LikeableGrailsPlugin {
                     }
                 }
 
-                like = { liker ->
+                like = { liker, params = [flush: true] ->
                     def instance = delegate
                     if (!instance.id) {
                         throw new LikeException("You must save the entity [${delegate}] before calling like")
@@ -92,11 +92,11 @@ class LikeableGrailsPlugin {
                         if (!l.validate()) {
                             throw new LikeException("You must save the entity [${liker}] before calling like")
                         }
-                        l.save()
+                        l.save(params as Map)
                     }
                     // for an existing like, delete it
                     else {
-                        l.delete()
+                        l.delete(params as Map)
                     }
                     return instance
                 }
