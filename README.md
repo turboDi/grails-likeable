@@ -13,8 +13,8 @@ Usage
 
 To use the plugin, you should define user evaluator and user's Class in grails-app/conf/Config.groovy:
 
-    grails.likeable.liker.evaluator = { request.user }
-    grails.likeable.liker.className = 'foo.bar.User'
+    grails.plugin.likeable.liker.evaluator = { request.user }
+    grails.plugin.likeable.liker.className = 'foo.bar.User'
 
 To add like functionality to domain type, you should implement the Likeable interface:
 

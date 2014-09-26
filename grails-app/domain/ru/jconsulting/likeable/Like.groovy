@@ -35,7 +35,7 @@ class Like {
     }
 
     def getLiker() {
-        String likerClass = grailsApplication.config.grails.likeable.liker.className
+        String likerClass = grailsApplication.config.grails.plugin.likeable.liker.className
         getClass().classLoader.loadClass(likerClass).get(likerId)
     }
 
