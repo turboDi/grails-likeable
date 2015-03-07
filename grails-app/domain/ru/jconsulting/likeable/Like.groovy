@@ -17,6 +17,7 @@ package ru.jconsulting.likeable
 class Like {
 
     def grailsApplication
+    def likeableDomainRegistry
 
     Date dateCreated
     Long likerId
@@ -37,6 +38,10 @@ class Like {
     def getLiker() {
         String likerClass = grailsApplication.config.grails.plugin.likeable.liker.className
         getClass().classLoader.loadClass(likerClass).get(likerId)
+    }
+
+    def getTarget() {
+        likeableDomainRegistry.getClassByType(type).get(likeRef)
     }
 
     @Override
