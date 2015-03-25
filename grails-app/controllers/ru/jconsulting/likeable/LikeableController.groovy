@@ -43,6 +43,13 @@ class LikeableController {
         render "${d.getTotalLikes()}"
     }
 
+    /**
+     * Return a list of <tt>Like</tt> objects of evaluated domain serialized as JSON
+     *
+     * @param type short type name of domain
+     * @param id instance id
+     * @return JSON list of likes of the instance or 404 if it doesn't exist
+     */
     def listLikes() {
         // this query should run really fast even without hitting database,
         // because likeable instance is already in persistence context
@@ -64,7 +71,7 @@ class LikeableController {
      */
     def evaluateLiker() {
         def evaluator = grailsApplication.config.grails.plugin.likeable.liker.evaluator
-        def liker
+        def liker = null
         if (evaluator instanceof Closure) {
             evaluator.delegate = this
             evaluator.resolveStrategy = Closure.DELEGATE_ONLY
