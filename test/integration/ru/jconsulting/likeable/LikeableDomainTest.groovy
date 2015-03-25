@@ -45,7 +45,16 @@ class LikeableDomainTest extends GroovyTestCase {
         saveTested()
 
         assertEquals 2, d.getAllLikes().size()
-        assertEquals d, d.getAllLikes(max: 1)[0].target
+        assertEquals([d], d.getAllLikes(max: 1)*.target)
+    }
+
+    void testPerLikerUniqueness() {
+        new Like(likerId: 1, likeRef: 1, type: 'testDomain').save()
+
+        def like = new Like(likerId: 1, likeRef: 1, type: 'testDomain')
+
+        assertFalse like.validate()
+        assertNotNull like.errors['likerId']
     }
 
     private void saveTested() {
