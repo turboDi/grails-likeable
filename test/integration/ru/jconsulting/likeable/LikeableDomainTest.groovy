@@ -41,6 +41,13 @@ class LikeableDomainTest extends GroovyTestCase {
         assertEquals d, d.userLike(l2).getTarget()
     }
 
+    void testGetAllLikes() {
+        saveTested()
+
+        assertEquals 2, d.getAllLikes().size()
+        assertEquals d, d.getAllLikes(max: 1)[0].target
+    }
+
     private void saveTested() {
         l1 = new TestLiker().save()
         l2 = new TestLiker().save()

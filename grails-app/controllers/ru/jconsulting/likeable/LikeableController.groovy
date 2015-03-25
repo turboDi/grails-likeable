@@ -14,6 +14,8 @@
  */
 package ru.jconsulting.likeable
 
+import grails.converters.JSON
+
 class LikeableController {
 
     def likeableDomainRegistry
@@ -39,6 +41,19 @@ class LikeableController {
 
         d.like(liker)
         render "${d.getTotalLikes()}"
+    }
+
+    def listLikes() {
+        // this query should run really fast even without hitting database,
+        // because likeable instance is already in persistence context
+        def d = likeableDomainRegistry.getClassByType(params.type).get(params.id)
+
+        if (!d) {
+            render(status: 404, message: "${params.type} with id ${params.id} not found")
+            return
+        }
+
+        render d.getAllLikes(params) as JSON
     }
 
     /**

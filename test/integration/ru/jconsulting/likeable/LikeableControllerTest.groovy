@@ -1,26 +1,64 @@
 package ru.jconsulting.likeable
 
-class LikeableControllerTest extends GroovyTestCase {
+import grails.test.spock.IntegrationSpec
+import org.springframework.beans.factory.annotation.Autowired
 
-    def likeableDomainRegistry
-    def controller = new LikeableController()
+class LikeableControllerTest extends IntegrationSpec {
 
-    void testLike() {
-        controller.likeableDomainRegistry = likeableDomainRegistry
-        TestDomain d = new TestDomain().save()
-        controller.request.user = new TestLiker().save()
-        controller.params.type = "testDomain"
-        controller.params.id = d.id
-        controller.like()
-        assertEquals "1", controller.response.contentAsString
+    @Autowired
+    LikeableController controller
+
+    TestDomain domain
+    TestLiker liker
+
+    def setup() {
+        domain = new TestDomain().save()
+        liker = new TestLiker().save()
     }
 
-    void testNotFound() {
-        controller.likeableDomainRegistry = likeableDomainRegistry
-        controller.request.user = new TestLiker().save()
+    def "test like"() {
+        given:
+        controller.request.user = liker
         controller.params.type = "testDomain"
-        controller.params.id = 1
+        controller.params.id = domain.id
+        when:
         controller.like()
-        assertEquals 404, controller.response.status
+        then:
+        '1' == controller.response.contentAsString
+    }
+
+    def "test like nonexistent"() {
+        given:
+        controller.request.user = liker
+        controller.params.type = "testDomain"
+        controller.params.id = 100500
+        when:
+        controller.like()
+        then:
+        404 == controller.response.status
+    }
+
+    def "test list all likes"() {
+        setup:
+        domain.like(liker)
+        and:
+        controller.params.type = "testDomain"
+        controller.params.id = domain.id
+        when:
+        controller.listLikes()
+        then:
+        [domain.id] == controller.response.json*.likeRef
+    }
+
+    def "test list all likes of nonexistent"() {
+        setup:
+        domain.like(liker)
+        and:
+        controller.params.type = "testDomain"
+        controller.params.id = 100500
+        when:
+        controller.listLikes()
+        then:
+        404 == controller.response.status
     }
 }

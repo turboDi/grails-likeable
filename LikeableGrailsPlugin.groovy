@@ -74,6 +74,19 @@ class LikeableGrailsPlugin {
                     }
                 }
 
+                getAllLikes = { params = [:] ->
+                    def instance = delegate
+                    if (instance.id == null) {
+                        return []
+                    }
+
+                    Like.createCriteria().list(params as Map) {
+                        eq "likeRef", instance.id
+                        eq "type", GrailsNameUtils.getPropertyName(instance.class)
+                        cache true
+                    }
+                }
+
                 like = { liker, params = [flush: true] ->
                     def instance = delegate
                     if (!instance.id) {
