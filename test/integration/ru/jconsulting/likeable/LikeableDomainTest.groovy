@@ -41,6 +41,33 @@ class LikeableDomainTest extends GroovyTestCase {
         assertEquals d, d.userLike(l2).getTarget()
     }
 
+    void testGetAllLikes() {
+        saveTested()
+
+        assertEquals 2, d.getAllLikes().size()
+        assertEquals([d], d.getAllLikes(max: 1)*.target)
+    }
+
+    void testPerLikerUniqueness() {
+        new Like(likerId: 1, likeRef: 1, type: 'testDomain').save()
+
+        def like = new Like(likerId: 1, likeRef: 1, type: 'testDomain')
+
+        assertFalse like.validate()
+        assertNotNull like.errors['likerId']
+    }
+
+    void testInitLike() {
+        saveTested()
+
+        def like = d.initLike(l1)
+
+        assertEquals d.id, like.likeRef
+        assertEquals l1.id, like.likerId
+        assertEquals 'testDomain', like.type
+        assertNull like.id
+    }
+
     private void saveTested() {
         l1 = new TestLiker().save()
         l2 = new TestLiker().save()
