@@ -57,6 +57,17 @@ class LikeableDomainTest extends GroovyTestCase {
         assertNotNull like.errors['likerId']
     }
 
+    void testInitLike() {
+        saveTested()
+
+        def like = d.initLike(l1)
+
+        assertEquals d.id, like.likeRef
+        assertEquals l1.id, like.likerId
+        assertEquals 'testDomain', like.type
+        assertNull like.id
+    }
+
     private void saveTested() {
         l1 = new TestLiker().save()
         l2 = new TestLiker().save()

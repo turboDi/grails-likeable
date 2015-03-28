@@ -24,7 +24,9 @@ class LikeableGrailsPlugin {
     def grailsVersion = "2.0 > *"
     def pluginExcludes = [
         "grails-app/domain/ru/jconsulting/likeable/TestDomain.groovy",
-        "grails-app/domain/ru/jconsulting/likeable/TestLiker.groovy"
+        "grails-app/domain/ru/jconsulting/likeable/TestLiker.groovy",
+        "grails-app/i18n/messages.properties",
+        "grails-app/conf/IntegrationTestsConfig.groovy"
     ]
 
     def title = "Likeable Plugin"
@@ -101,7 +103,7 @@ class LikeableGrailsPlugin {
                     }
                     // if there is no existing value, create a new one
                     if (!l) {
-                        l = new Like(likerId: liker.id, likeRef: instance.id, type: GrailsNameUtils.getPropertyName(instance.class))
+                        l = instance.initLike(liker)
                         if (!l.validate()) {
                             throw new LikeException("You must save the entity [${liker}] before calling like")
                         }
@@ -112,6 +114,14 @@ class LikeableGrailsPlugin {
                         l.delete(params as Map)
                     }
                     return instance
+                }
+
+                initLike = { liker ->
+                    def instance = delegate
+                    if (!instance.id) {
+                        throw new LikeException("You must save the entity [${delegate}] before calling like")
+                    }
+                    new Like(likerId: liker.id, likeRef: instance.id, type: GrailsNameUtils.getPropertyName(instance.class))
                 }
 
                 userLike = { user ->

@@ -1,0 +1,1 @@
+grails.mime.types = [ json: ['application/json', 'text/json'] ]

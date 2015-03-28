@@ -16,6 +16,12 @@ package ru.jconsulting.likeable
 
 import grails.converters.JSON
 
+/**
+ * Default <tt>Likeable</tt> controller with add like and list likes functionality
+ *
+ * @deprecated Use {@link LikeController} instead
+ */
+@Deprecated
 class LikeableController {
 
     def likeableDomainRegistry
