@@ -20,8 +20,8 @@ import ru.jconsulting.likeable.LikeException
 import ru.jconsulting.likeable.Likeable
 
 class LikeableGrailsPlugin {
-    def version = "0.3.0"
-    def grailsVersion = "2.0 > *"
+    def version = "0.3.1"
+    def grailsVersion = "2.3 > *"
     def pluginExcludes = [
         "grails-app/domain/ru/jconsulting/likeable/TestDomain.groovy",
         "grails-app/domain/ru/jconsulting/likeable/TestLiker.groovy",
