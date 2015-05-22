@@ -17,9 +17,12 @@ class LikeController extends RestfulController<Like> {
 
     @Override
     protected Like queryForResource(Serializable id) {
-        def likeable = evaluateLikeable(params)
         def liker = evaluateLiker()
-        likeable.userLike(liker)
+        Like like = super.queryForResource(id) as Like
+        if (request.method != 'GET' && like && liker.id != like.likerId) {
+            throw new LikeException("You are not allowed to $request.method $like")
+        }
+        like
     }
 
     @Override
