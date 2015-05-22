@@ -1,6 +1,7 @@
 package ru.jconsulting.likeable
 
 import grails.test.spock.IntegrationSpec
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
@@ -15,11 +16,18 @@ class LikeControllerTest extends IntegrationSpec {
     @Autowired
     LikeController controller
 
+    @Autowired
+    GrailsApplication grailsApplication
+
     TestDomain domain
     TestLiker liker
 
     def setup() {
         domain = new TestDomain().save()
+        controller.metaClass.restrictedDomain = new TestDomain().save()
+        grailsApplication.config.grails.plugin.likeable.permission.evaluator = { liker, likeable ->
+            !restrictedDomain.equals(likeable)
+        }
         liker = new TestLiker().save()
         controller.params.format = 'json'
     }
@@ -106,6 +114,17 @@ class LikeControllerTest extends IntegrationSpec {
         controller.index()
         then:
         404 == controller.response.status
+    }
+
+    def "test like restricted"() {
+        given:
+        controller.request.user = liker
+        controller.params.type = "testDomain"
+        controller.params.likeableId = controller.restrictedDomain.id
+        when:
+        controller.save()
+        then:
+        thrown(LikeException)
     }
 
 }

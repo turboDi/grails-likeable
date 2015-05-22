@@ -26,6 +26,9 @@ class LikeController extends RestfulController<Like> {
     protected Like createResource(Map params) {
         def likeable = evaluateLikeable(params)
         def liker = evaluateLiker()
+        if (!hasPermission(liker, likeable)) {
+            throw new LikeException("You are not allowed to like $likeable")
+        }
         likeable.initLike(liker)
     }
 
@@ -85,5 +88,22 @@ class LikeController extends RestfulController<Like> {
             throw new LikeException("The evaluated Like liker is not a persistent instance.")
         }
         return liker
+    }
+
+    /**
+     * Checks if evaluated user has permissions to like entity. This check is made in accordance to
+     * <tt>grails.likeable.liker.evaluator</tt> config of application. For example, it can be used to restrict self likes
+     *
+     * @param liker user attempting to like the entity
+     * @param likeable entity
+     * @return <tt>true</tt> if user has permissions or <tt>false</tt> otherwise
+     */
+    protected def hasPermission(liker, likeable) {
+        def evaluator = grailsApplication.config.grails.plugin.likeable.permission.evaluator
+        if (evaluator instanceof Closure) {
+            evaluator.delegate = this
+            evaluator.resolveStrategy = Closure.DELEGATE_ONLY
+            evaluator.call(liker, likeable)
+        }
     }
 }
