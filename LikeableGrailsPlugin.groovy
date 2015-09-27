@@ -20,7 +20,7 @@ import ru.jconsulting.likeable.LikeException
 import ru.jconsulting.likeable.Likeable
 
 class LikeableGrailsPlugin {
-    def version = "0.3.1"
+    def version = "0.3.2"
     def grailsVersion = "2.3 > *"
     def pluginExcludes = [
         "grails-app/domain/ru/jconsulting/likeable/TestDomain.groovy",
@@ -82,11 +82,9 @@ class LikeableGrailsPlugin {
                         return []
                     }
 
-                    Like.createCriteria().list(params as Map) {
-                        eq "likeRef", instance.id
-                        eq "type", GrailsNameUtils.getPropertyName(instance.class)
-                        cache true
-                    }
+                    params.cache = true
+
+                    Like.findAllByLikeRefAndType(instance.id, GrailsNameUtils.getPropertyName(instance.class), params)
                 }
 
                 like = { liker, params = [flush: true] ->
