@@ -45,10 +45,6 @@ class LikeableGrailsPlugin {
             config.liker.evaluator = { request.user }
         }
 
-        if (!config.permission.evaluator) {
-            config.permission.evaluator = { liker, likeable -> true }
-        }
-
         // find all Likeable domains and add their classes to registry
         def domains = application.domainClasses.findAll {Likeable.isAssignableFrom(it.clazz)}.collect {it.clazz}
         likeableDomainRegistry(DomainTypeRegistry) {
