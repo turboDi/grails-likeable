@@ -32,7 +32,7 @@ class LikeController extends RestfulController<Like> {
     @Override
     protected List<Like> listAllResources(Map params) {
         def likeable = evaluateLikeable(params)
-        likeable.getAllLikes()
+        likeable.getAllLikes(params)
     }
 
     /**

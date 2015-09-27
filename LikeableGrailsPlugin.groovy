@@ -82,11 +82,9 @@ class LikeableGrailsPlugin {
                         return []
                     }
 
-                    Like.createCriteria().list(params as Map) {
-                        eq "likeRef", instance.id
-                        eq "type", GrailsNameUtils.getPropertyName(instance.class)
-                        cache true
-                    }
+                    params.cache = true
+
+                    Like.findAllByLikeRefAndType(instance.id, GrailsNameUtils.getPropertyName(instance.class), params)
                 }
 
                 like = { liker, params = [flush: true] ->
