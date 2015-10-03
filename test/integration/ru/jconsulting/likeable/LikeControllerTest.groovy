@@ -1,6 +1,7 @@
 package ru.jconsulting.likeable
 
 import grails.test.spock.IntegrationSpec
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
 
 /**
@@ -15,11 +16,19 @@ class LikeControllerTest extends IntegrationSpec {
     @Autowired
     LikeController controller
 
+    @Autowired
+    GrailsApplication grailsApplication
+
     TestDomain domain
     TestLiker liker
 
     def setup() {
         domain = new TestDomain().save()
+        controller.metaClass.restrictedDomain = new TestDomain().save()
+        grailsApplication.config.grails.plugin.likeable.liker.className = TestLiker.name
+        grailsApplication.config.grails.plugin.likeable.permission.evaluator = { liker, likeable ->
+            !restrictedDomain.equals(likeable)
+        }
         liker = new TestLiker().save()
         controller.params.format = 'json'
     }
@@ -66,8 +75,7 @@ class LikeControllerTest extends IntegrationSpec {
         domain.like(liker)
         and:
         controller.request.user = liker
-        controller.params.type = "testDomain"
-        controller.params.likeableId = domain.id
+        controller.params.id = domain.userLike(liker).id
         when:
         controller.delete()
         then:
@@ -75,13 +83,25 @@ class LikeControllerTest extends IntegrationSpec {
         !domain.userLiked(liker)
     }
 
-    def "test dislike nonexistent"() {
+    def "test delete other's like"() {
+        setup:
+        def other = new TestLiker().save()
+        domain.like(other)
+        and:
+        controller.request.user = liker
+        controller.params.id = domain.userLike(other).id
+        when:
+        controller.delete()
+        then:
+        thrown(LikeException)
+    }
+
+    def "test delete nonexistent like"() {
         given:
         controller.request.user = liker
-        controller.params.type = "testDomain"
-        controller.params.likeableId = 100500
+        controller.params.id = 100500
         when:
-        controller.save()
+        controller.delete()
         then:
         404 == controller.response.status
     }
@@ -106,6 +126,17 @@ class LikeControllerTest extends IntegrationSpec {
         controller.index()
         then:
         404 == controller.response.status
+    }
+
+    def "test like restricted"() {
+        given:
+        controller.request.user = liker
+        controller.params.type = "testDomain"
+        controller.params.likeableId = controller.restrictedDomain.id
+        when:
+        controller.save()
+        then:
+        thrown(LikeException)
     }
 
 }
