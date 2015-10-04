@@ -25,7 +25,7 @@ class Like {
     String type
 
     static constraints = {
-        likerId min: 0L
+        likerId min: 0L, unique: ['likeRef', 'type']
         likeRef min: 0L
         type blank: false
     }
